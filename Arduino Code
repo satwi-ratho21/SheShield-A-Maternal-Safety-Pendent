@@ -1,0 +1,87 @@
+#include <SoftwareSerial.h>
+
+// Pins
+const int buttonPin = 2;
+const int buzzerPin = 3;
+const int redPin = 4;
+const int greenPin = 5;
+const int bluePin = 6;
+const int pulsePin = A0;
+
+SoftwareSerial bluetooth(10, 11); // RX, TX
+
+// Heartbeat thresholds
+const int thresholdLow = 300;
+const int thresholdHigh = 750;
+
+unsigned long lastAlertTime = 0;
+const unsigned long alertCooldown = 5000; // 5 seconds
+int smoothedPulse = 0;  // For signal smoothing
+
+void setup() {
+  pinMode(buttonPin, INPUT_PULLUP);
+  pinMode(buzzerPin, OUTPUT);
+  pinMode(redPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+  pinMode(bluePin, OUTPUT);
+
+  bluetooth.begin(9600);
+  Serial.begin(9600);
+
+  setRGB(0, 0, 255); // Blue = Initialized
+  Serial.println("SheShield Initialized");
+  bluetooth.println("SheShield Initialized");
+
+  delay(2000);
+  setRGB(0, 0, 0); // Off initially
+}
+
+void loop() {
+  // Read and smooth pulse sensor signal
+  int rawPulse = analogRead(pulsePin);
+  smoothedPulse = (smoothedPulse * 0.7) + (rawPulse * 0.3); // simple low-pass filter
+  Serial.println(smoothedPulse); // For Serial Plotter
+
+  unsigned long currentTime = millis();
+
+  // Alert if out of safe range
+  if ((smoothedPulse < thresholdLow || smoothedPulse > thresholdHigh) && (currentTime - lastAlertTime > alertCooldown)) {
+    sendAlert("Abnormal Heart Rate Detected!");
+    lastAlertTime = currentTime;
+  } else if (smoothedPulse >= thresholdLow && smoothedPulse <= thresholdHigh) {
+    setRGB(0, 255, 0); // Green = Normal heartbeat
+  }
+
+  // Check SOS button
+  if (digitalRead(buttonPin) == LOW) {
+    delay(50); // debounce
+    if (digitalRead(buttonPin) == LOW) {
+      sendAlert("Manual SOS Triggered!");
+      delay(1000); // avoid rapid triggers
+    }
+  }
+
+  delay(20); // Faster loop for smoother waveform
+}
+
+void sendAlert(String message) {
+  Serial.println(message);
+  bluetooth.println(message);
+
+  setRGB(255, 0, 0); // Red = Alert
+
+  for (int i = 0; i < 3; i++) {
+    digitalWrite(buzzerPin, HIGH);
+    delay(200);
+    digitalWrite(buzzerPin, LOW);
+    delay(200);
+  }
+
+  setRGB(0, 0, 0); // Turn off RGB after alert
+}
+
+void setRGB(int r, int g, int b) {
+  analogWrite(redPin, r);
+  analogWrite(greenPin, g);
+  analogWrite(bluePin, b);
+} 
