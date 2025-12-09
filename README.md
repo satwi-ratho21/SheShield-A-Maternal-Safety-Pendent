@@ -23,10 +23,12 @@ Standalone SOS devices send alerts but do not offer health monitoring.
 **4. Proposed Design**
 The SheShield prototype consists of:
 Hardware: Arduino Uno / Nano, HC-05 Bluetooth module, pulse sensor, RGB LED, buzzer, SOS push button.
+
  <img width="830" height="427" alt="image" src="https://github.com/user-attachments/assets/a77ed804-e45c-46a1-8f3f-160a7a22959e" />
 
 **Working Principle:**
   1. When the SOS button is pressed, an alert is sent to the smartphone via Bluetooth.
+     
      <img width="232" height="410" alt="image" src="https://github.com/user-attachments/assets/24e916c2-1b1d-405c-9e6e-79a607caaef1" />
 
   2. The pulse sensor continuously monitors heart rate, and abnormal readings can trigger alerts.
@@ -36,7 +38,9 @@ Hardware: Arduino Uno / Nano, HC-05 Bluetooth module, pulse sensor, RGB LED, buz
 
 **5. Results and Discussion**
 **Testing confirmed: **
+
 <img width="268" height="374" alt="image" src="https://github.com/user-attachments/assets/47397d10-27d1-47ad-83c6-4ca62a79cdc0" />
+
 * Reliable Bluetooth connection between pendant and smartphone.
 * Accurate heart rate monitoring displayed on Arduino serial monitor.
 * Effective user feedback through RGB LED and buzzer on SOS activation.
